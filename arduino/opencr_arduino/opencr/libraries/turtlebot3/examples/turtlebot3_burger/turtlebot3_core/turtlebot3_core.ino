@@ -37,7 +37,6 @@ void setup()
   nh.advertise(sensor_state_pub);  
   nh.advertise(version_info_pub);
   nh.advertise(imu_pub);
-  nh.advertise(cmd_vel_rc100_pub);
   nh.advertise(odom_pub);
   nh.advertise(joint_states_pub);
   nh.advertise(battery_state_pub);
@@ -53,9 +52,6 @@ void setup()
 
   // Init diagnosis
   diagnosis.init();
-
-  // Setting for ROBOTIS RC100 remote controller and cmd_vel
-  controllers.init(MAX_LINEAR_VELOCITY, MAX_ANGULAR_VELOCITY);
 
   // Setting for SLAM and navigation (odometry, joint states, TF)
   initOdom();
@@ -92,11 +88,6 @@ void loop()
     tTime[0] = t;
   }
 
-  if ((t-tTime[1]) >= (1000 / CMD_VEL_PUBLISH_FREQUENCY))
-  {
-    publishCmdVelFromRC100Msg();
-    tTime[1] = t;
-  }
 
   if ((t-tTime[2]) >= (1000 / DRIVE_INFORMATION_PUBLISH_FREQUENCY))
   {
@@ -130,10 +121,6 @@ void loop()
   // Send log message after ROS connection
   sendLogMsg();
 
-  // Receive data from RC100 
-  bool clicked_state = controllers.getRCdata(goal_velocity_from_rc100);
-  if (clicked_state == true)  
-    tTime[6] = millis();
 
   // Check push button pressed for simple test drive
   driveTest(diagnosis.getButtonPress(3000));
@@ -215,16 +202,6 @@ void resetCallback(const std_msgs::Empty& reset_msg)
   nh.loginfo(log_msg);  
 }
 
-/*******************************************************************************
-* Publish msgs (CMD Velocity data from RC100 : angular velocity, linear velocity)
-*******************************************************************************/
-void publishCmdVelFromRC100Msg(void)
-{
-  cmd_vel_rc100_msg.linear.x  = goal_velocity_from_rc100[LINEAR];
-  cmd_vel_rc100_msg.angular.z = goal_velocity_from_rc100[ANGULAR];
-
-  cmd_vel_rc100_pub.publish(&cmd_vel_rc100_msg);
-}
 
 /*******************************************************************************
 * Publish msgs (IMU data: angular velocity, linear acceleration, orientation)
@@ -804,8 +781,8 @@ void initJointStates(void)
 *******************************************************************************/
 void updateGoalVelocity(void)
 {
-  goal_velocity[LINEAR]  = goal_velocity_from_button[LINEAR]  + goal_velocity_from_cmd[LINEAR]  + goal_velocity_from_rc100[LINEAR];
-  goal_velocity[ANGULAR] = goal_velocity_from_button[ANGULAR] + goal_velocity_from_cmd[ANGULAR] + goal_velocity_from_rc100[ANGULAR];
+  goal_velocity[LINEAR]  = goal_velocity_from_button[LINEAR]  + goal_velocity_from_cmd[LINEAR];
+  goal_velocity[ANGULAR] = goal_velocity_from_button[ANGULAR] + goal_velocity_from_cmd[ANGULAR];
 
   sensors.setLedPattern(goal_velocity[LINEAR], goal_velocity[ANGULAR]);
 }
