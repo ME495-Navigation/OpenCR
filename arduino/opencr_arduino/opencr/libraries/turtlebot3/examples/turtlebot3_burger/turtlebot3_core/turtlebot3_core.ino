@@ -34,8 +34,6 @@ void setup()
   
   nh.advertise(sensor_state_pub);  
   nh.advertise(imu_pub);
-  nh.advertise(joint_states_pub);
-  nh.advertise(battery_state_pub);
   nh.advertise(mag_pub);
 
   // Setting for Dynamixel motors
@@ -81,7 +79,6 @@ void loop()
   if ((t-tTime[2]) >= (1000 / DRIVE_INFORMATION_PUBLISH_FREQUENCY))
   {
     publishSensorStateMsg();
-    publishBatteryStateMsg();
     tTime[2] = t;
   }
 
@@ -101,19 +98,6 @@ void loop()
 
   // Update the IMU unit
   sensors.updateIMU();
-
-  // TODO
-  // Update sonar data
-  // sensors.updateSonar(t);
-
-  // Start Gyro Calibration after ROS connection
-  updateGyroCali(nh.connected());
-
-  // Show LED status
-  diagnosis.showLedStatus(nh.connected());
-
-  // Update Voltage
-  battery_state = diagnosis.updateVoltageCheck(setup_end);
 
   // Call all the callbacks waiting to be called at that point in time
   nh.spinOnce();
@@ -207,25 +191,6 @@ void publishSensorStateMsg(void)
     return;
 
   sensor_state_pub.publish(&sensor_state_msg);
-}
-
-
-/*******************************************************************************
-* Publish msgs (battery_state)
-*******************************************************************************/
-void publishBatteryStateMsg(void)
-{
-  battery_state_msg.header.stamp = rosNow();
-  battery_state_msg.design_capacity = 1.8f; //Ah
-  battery_state_msg.voltage = sensors.checkVoltage();
-  battery_state_msg.percentage = (float)(battery_state_msg.voltage / 11.1f);
-
-  if (battery_state == 0)
-    battery_state_msg.present = false;
-  else
-    battery_state_msg.present = true;  
-
-  battery_state_pub.publish(&battery_state_msg);
 }
 
 

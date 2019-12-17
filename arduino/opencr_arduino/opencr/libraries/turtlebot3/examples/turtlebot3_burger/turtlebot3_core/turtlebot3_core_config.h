@@ -81,7 +81,6 @@ void publishCmdVelFromRC100Msg(void);
 void publishImuMsg(void);
 void publishMagMsg(void);
 void publishSensorStateMsg(void);
-void publishBatteryStateMsg(void);
 void publishDriveInformation(void);
 
 ros::Time rosNow(void);
@@ -147,32 +146,13 @@ ros::Publisher sensor_state_pub("sensor_state", &sensor_state_msg);
 sensor_msgs::Imu imu_msg;
 ros::Publisher imu_pub("imu", &imu_msg);
 
-// Command velocity of Turtlebot3 using RC100 remote controller
-geometry_msgs::Twist cmd_vel_rc100_msg;
-ros::Publisher cmd_vel_rc100_pub("cmd_vel_rc100", &cmd_vel_rc100_msg);
-
-// Odometry of Turtlebot3
-nav_msgs::Odometry odom;
-ros::Publisher odom_pub("odom", &odom);
-
 // Joint(Dynamixel) state of Turtlebot3
 sensor_msgs::JointState joint_states;
 ros::Publisher joint_states_pub("joint_states", &joint_states);
 
-// Battey state of Turtlebot3
-sensor_msgs::BatteryState battery_state_msg;
-ros::Publisher battery_state_pub("battery_state", &battery_state_msg);
-
 // Magnetic field
 sensor_msgs::MagneticField mag_msg;
 ros::Publisher mag_pub("magnetic_field", &mag_msg);
-
-/*******************************************************************************
-* Transform Broadcaster
-*******************************************************************************/
-// TF of Turtlebot3
-geometry_msgs::TransformStamped odom_tf;
-tf::TransformBroadcaster tf_broadcaster;
 
 /*******************************************************************************
 * SoftwareTimer of Turtlebot3
