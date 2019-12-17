@@ -74,7 +74,6 @@
 // Callback function prototypes
 void wheelCommandsCallback(const nurtle::WheelCommands & wheel_cmd_msg);
 void soundCallback(const turtlebot3_msgs::Sound& sound_msg);
-void motorPowerCallback(const std_msgs::Bool& power_msg);
 void resetCallback(const std_msgs::Empty& reset_msg);
 
 // Function prototypes
@@ -133,8 +132,6 @@ char joint_state_header_frame_id[30];
 ros::Subscriber<nurtle::WheelCommands> wheel_cmd_sub("wheel_cmd", wheelCommandsCallback);
 
 ros::Subscriber<turtlebot3_msgs::Sound> sound_sub("sound", soundCallback);
-
-ros::Subscriber<std_msgs::Bool> motor_power_sub("motor_power", motorPowerCallback);
 
 ros::Subscriber<std_msgs::Empty> reset_sub("reset", resetCallback);
 

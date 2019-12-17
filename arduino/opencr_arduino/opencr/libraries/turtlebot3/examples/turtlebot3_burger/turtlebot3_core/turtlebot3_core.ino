@@ -30,7 +30,6 @@ void setup()
   nh.getHardware()->setBaud(115200);
 
   nh.subscribe(sound_sub);
-  nh.subscribe(motor_power_sub);
   nh.subscribe(wheel_cmd_sub);
   
   nh.advertise(sensor_state_pub);  
@@ -83,7 +82,6 @@ void loop()
   {
     publishSensorStateMsg();
     publishBatteryStateMsg();
-    publishDriveInformation();
     tTime[2] = t;
   }
 
@@ -93,15 +91,6 @@ void loop()
     publishMagMsg();
     tTime[3] = t;
   }
-
-
-#ifdef DEBUG
-  if ((t-tTime[5]) >= (1000 / DEBUG_LOG_FREQUENCY))
-  {
-    sendDebuglog();
-    tTime[5] = t;
-  }
-#endif
 
   // Send log message after ROS connection
   sendLogMsg();
@@ -151,15 +140,6 @@ void soundCallback(const turtlebot3_msgs::Sound& sound_msg)
   sensors.makeSound(sound_msg.value);
 }
 
-/*******************************************************************************
-* Callback function for motor_power msg
-*******************************************************************************/
-void motorPowerCallback(const std_msgs::Bool& power_msg)
-{
-  bool dxl_power = power_msg.data;
-
-  motor_driver.setTorque(dxl_power);
-}
 
 /*******************************************************************************
 * Callback function for reset msg
@@ -226,19 +206,6 @@ void publishSensorStateMsg(void)
   else
     return;
 
-  sensor_state_msg.bumper = sensors.checkPushBumper();
-
-  sensor_state_msg.cliff = sensors.getIRsensorData();
-
-  // TODO
-  // sensor_state_msg.sonar = sensors.getSonarData();
-
-  sensor_state_msg.illumination = sensors.getIlluminationData();
-  
-  sensor_state_msg.button = sensors.checkPushButton();
-
-  sensor_state_msg.torque = motor_driver.getTorque();
-
   sensor_state_pub.publish(&sensor_state_msg);
 }
 
@@ -261,41 +228,6 @@ void publishBatteryStateMsg(void)
   battery_state_pub.publish(&battery_state_msg);
 }
 
-/*******************************************************************************
-* Publish msgs (odometry, joint states, tf)
-*******************************************************************************/
-void publishDriveInformation(void)
-{
-  unsigned long time_now = millis();
-  unsigned long step_time = time_now - prev_update_time;
-
-  prev_update_time = time_now;
-  ros::Time stamp_now = rosNow();
-
-  // joint states
-  updateJointStates();
-  joint_states.header.stamp = stamp_now;
-  joint_states_pub.publish(&joint_states);
-}
-
-/*******************************************************************************
-* Update the joint states 
-*******************************************************************************/
-void updateJointStates(void)
-{
-  static float joint_states_pos[WHEEL_NUM] = {0.0, 0.0};
-  static float joint_states_vel[WHEEL_NUM] = {0.0, 0.0};
-  //static float joint_states_eff[WHEEL_NUM] = {0.0, 0.0};
-
-  joint_states_pos[LEFT]  = last_rad[LEFT];
-  joint_states_pos[RIGHT] = last_rad[RIGHT];
-
-  joint_states_vel[LEFT]  = last_velocity[LEFT];
-  joint_states_vel[RIGHT] = last_velocity[RIGHT];
-
-  joint_states.position = joint_states_pos;
-  joint_states.velocity = joint_states_vel;
-}
 
 /*******************************************************************************
 * Update motor information
