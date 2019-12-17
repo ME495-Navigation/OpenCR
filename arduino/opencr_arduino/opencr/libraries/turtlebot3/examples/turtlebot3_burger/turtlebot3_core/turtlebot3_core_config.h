@@ -37,7 +37,6 @@
 
 #include <turtlebot3_msgs/SensorState.h>
 #include <turtlebot3_msgs/Sound.h>
-#include <turtlebot3_msgs/VersionInfo.h>
 
 #include <TurtleBot3.h>
 #include "turtlebot3_burger.h"
@@ -51,7 +50,6 @@
 #define IMU_PUBLISH_FREQUENCY                  200  //hz
 #define CMD_VEL_PUBLISH_FREQUENCY              30   //hz
 #define DRIVE_INFORMATION_PUBLISH_FREQUENCY    30   //hz
-#define VERSION_INFORMATION_PUBLISH_FREQUENCY  1    //hz 
 #define DEBUG_LOG_FREQUENCY                    10   //hz 
 
 #define WHEEL_NUM                        2
@@ -84,7 +82,6 @@ void publishCmdVelFromRC100Msg(void);
 void publishImuMsg(void);
 void publishMagMsg(void);
 void publishSensorStateMsg(void);
-void publishVersionInfoMsg(void);
 void publishBatteryStateMsg(void);
 void publishDriveInformation(void);
 
@@ -148,9 +145,6 @@ ros::Subscriber<std_msgs::Empty> reset_sub("reset", resetCallback);
 turtlebot3_msgs::SensorState sensor_state_msg;
 ros::Publisher sensor_state_pub("sensor_state", &sensor_state_msg);
 
-// Version information of Turtlebot3
-turtlebot3_msgs::VersionInfo version_info_msg;
-ros::Publisher version_info_pub("firmware_version", &version_info_msg);
 
 // IMU of Turtlebot3
 sensor_msgs::Imu imu_msg;

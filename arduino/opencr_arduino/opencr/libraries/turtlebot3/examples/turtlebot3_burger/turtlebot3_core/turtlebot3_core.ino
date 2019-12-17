@@ -34,7 +34,6 @@ void setup()
   nh.subscribe(wheel_cmd_sub);
   
   nh.advertise(sensor_state_pub);  
-  nh.advertise(version_info_pub);
   nh.advertise(imu_pub);
   nh.advertise(joint_states_pub);
   nh.advertise(battery_state_pub);
@@ -95,11 +94,6 @@ void loop()
     tTime[3] = t;
   }
 
-  if ((t-tTime[4]) >= (1000 / VERSION_INFORMATION_PUBLISH_FREQUENCY))
-  {
-    publishVersionInfoMsg();
-    tTime[4] = t;
-  }
 
 #ifdef DEBUG
   if ((t-tTime[5]) >= (1000 / DEBUG_LOG_FREQUENCY))
@@ -248,17 +242,6 @@ void publishSensorStateMsg(void)
   sensor_state_pub.publish(&sensor_state_msg);
 }
 
-/*******************************************************************************
-* Publish msgs (version info)
-*******************************************************************************/
-void publishVersionInfoMsg(void)
-{
-  version_info_msg.hardware = "0.0.0";
-  version_info_msg.software = "0.0.0";
-  version_info_msg.firmware = FIRMWARE_VER;
-
-  version_info_pub.publish(&version_info_msg);
-}
 
 /*******************************************************************************
 * Publish msgs (battery_state)
