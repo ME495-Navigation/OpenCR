@@ -74,7 +74,7 @@
 #define DEBUG_SERIAL                     SerialBT2
 
 // Callback function prototypes
-void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg);
+void wheelCommandsCallback(const nurtle::WheelCommands & wheel_cmd_msg);
 void soundCallback(const turtlebot3_msgs::Sound& sound_msg);
 void motorPowerCallback(const std_msgs::Bool& power_msg);
 void resetCallback(const std_msgs::Empty& reset_msg);
@@ -133,7 +133,7 @@ char joint_state_header_frame_id[30];
 /*******************************************************************************
 * Subscriber
 *******************************************************************************/
-ros::Subscriber<geometry_msgs::Twist> cmd_vel_sub("cmd_vel", commandVelocityCallback);
+ros::Subscriber<nurtle::WheelCommands> wheel_cmd_sub("wheel_cmd", wheelCommandsCallback);
 
 ros::Subscriber<turtlebot3_msgs::Sound> sound_sub("sound", soundCallback);
 
@@ -219,6 +219,8 @@ float goal_velocity[WHEEL_NUM] = {0.0, 0.0};
 float goal_velocity_from_button[WHEEL_NUM] = {0.0, 0.0};
 float goal_velocity_from_cmd[WHEEL_NUM] = {0.0, 0.0};
 float goal_velocity_from_rc100[WHEEL_NUM] = {0.0, 0.0};
+
+int32_t left_velocity = 0, right_velocity = 0;
 
 /*******************************************************************************
 * Declaration for diagnosis

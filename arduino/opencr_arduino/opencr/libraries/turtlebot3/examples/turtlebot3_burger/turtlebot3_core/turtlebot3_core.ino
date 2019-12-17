@@ -29,11 +29,10 @@ void setup()
   nh.initNode();
   nh.getHardware()->setBaud(115200);
 
-  nh.subscribe(cmd_vel_sub);
   nh.subscribe(sound_sub);
   nh.subscribe(motor_power_sub);
-  nh.subscribe(reset_sub);
-
+  nh.subscribe(wheel_cmd_sub);
+  
   nh.advertise(sensor_state_pub);  
   nh.advertise(version_info_pub);
   nh.advertise(imu_pub);
@@ -70,13 +69,12 @@ void loop()
 
   if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_FREQUENCY))
   {
-    updateGoalVelocity();
     if ((t-tTime[6]) > CONTROL_MOTOR_TIMEOUT) 
     {
-      motor_driver.controlMotor(WHEEL_RADIUS, WHEEL_SEPARATION, zero_velocity);
+        motor_driver.writeVelocity(0, 0);
     } 
     else {
-      motor_driver.controlMotor(WHEEL_RADIUS, WHEEL_SEPARATION, goal_velocity);
+        motor_driver.writeVelocity(left_velocity, right_velocity);
     }
     tTime[0] = t;
   }
@@ -144,13 +142,10 @@ void loop()
 /*******************************************************************************
 * Callback function for cmd_vel msg
 *******************************************************************************/
-void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg)
+void wheelCommandsCallback(const nurtle::WheelCommands & cmd_msg)
 {
-  goal_velocity_from_cmd[LINEAR]  = cmd_vel_msg.linear.x;
-  goal_velocity_from_cmd[ANGULAR] = cmd_vel_msg.angular.z;
-
-  goal_velocity_from_cmd[LINEAR]  = constrain(goal_velocity_from_cmd[LINEAR],  MIN_LINEAR_VELOCITY, MAX_LINEAR_VELOCITY);
-  goal_velocity_from_cmd[ANGULAR] = constrain(goal_velocity_from_cmd[ANGULAR], MIN_ANGULAR_VELOCITY, MAX_ANGULAR_VELOCITY);
+    left_velocity = cmd_msg.left_velocity;
+    right_velocity = cmd_msg.right_velocity;
   tTime[6] = millis();
 }
 
