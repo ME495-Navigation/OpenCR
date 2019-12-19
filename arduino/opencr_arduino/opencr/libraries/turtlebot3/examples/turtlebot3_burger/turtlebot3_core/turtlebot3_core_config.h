@@ -30,11 +30,13 @@
 #include <sensor_msgs/MagneticField.h>
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/Twist.h>
-#include "nurtle/WheelCommands.h"
+#include "nuturtlebot/WheelCommands.h"
+#include "nuturtlebot/SensorData.h"
 #include <tf/tf.h>
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
 
+#include "MPU9250.h"
 #include <turtlebot3_msgs/SensorState.h>
 #include <turtlebot3_msgs/Sound.h>
 
@@ -48,7 +50,6 @@
 #define CONTROL_MOTOR_SPEED_FREQUENCY          30   //hz
 #define CONTROL_MOTOR_TIMEOUT                  500  //ms
 #define IMU_PUBLISH_FREQUENCY                  200  //hz
-#define CMD_VEL_PUBLISH_FREQUENCY              30   //hz
 #define DRIVE_INFORMATION_PUBLISH_FREQUENCY    30   //hz
 #define DEBUG_LOG_FREQUENCY                    10   //hz 
 
@@ -72,16 +73,11 @@
 #define DEBUG_SERIAL                     SerialBT2
 
 // Callback function prototypes
-void wheelCommandsCallback(const nurtle::WheelCommands & wheel_cmd_msg);
+void wheelCommandsCallback(const nuturtlebot::WheelCommands & wheel_cmd_msg);
 void soundCallback(const turtlebot3_msgs::Sound& sound_msg);
 void resetCallback(const std_msgs::Empty& reset_msg);
 
-// Function prototypes
-void publishCmdVelFromRC100Msg(void);
-void publishImuMsg(void);
-void publishMagMsg(void);
-void publishSensorStateMsg(void);
-void publishDriveInformation(void);
+void publishSensorDataMsg(void);
 
 ros::Time rosNow(void);
 ros::Time addMicros(ros::Time & t, uint32_t _micros); // deprecated
@@ -128,7 +124,7 @@ char joint_state_header_frame_id[30];
 /*******************************************************************************
 * Subscriber
 *******************************************************************************/
-ros::Subscriber<nurtle::WheelCommands> wheel_cmd_sub("wheel_cmd", wheelCommandsCallback);
+ros::Subscriber<nuturtlebot::WheelCommands> wheel_cmd_sub("wheel_cmd", wheelCommandsCallback);
 
 ros::Subscriber<turtlebot3_msgs::Sound> sound_sub("sound", soundCallback);
 
@@ -141,6 +137,8 @@ ros::Subscriber<std_msgs::Empty> reset_sub("reset", resetCallback);
 turtlebot3_msgs::SensorState sensor_state_msg;
 ros::Publisher sensor_state_pub("sensor_state", &sensor_state_msg);
 
+nuturtlebot::SensorData sensor_data;
+ros::Publisher sensor_data_pub("sensor_data", &sensor_data);
 
 // IMU of Turtlebot3
 sensor_msgs::Imu imu_msg;
@@ -211,4 +209,8 @@ double odom_vel[3];
 bool setup_end        = false;
 uint8_t battery_state = 0;
 
+
+cMPU9250 imu;
+
+int32_t left_enc, right_enc;
 #endif // TURTLEBOT3_CORE_CONFIG_H_

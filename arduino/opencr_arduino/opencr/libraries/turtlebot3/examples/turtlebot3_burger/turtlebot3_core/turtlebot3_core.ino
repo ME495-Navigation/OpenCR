@@ -32,9 +32,7 @@ void setup()
   nh.subscribe(sound_sub);
   nh.subscribe(wheel_cmd_sub);
   
-  nh.advertise(sensor_state_pub);  
-  nh.advertise(imu_pub);
-  nh.advertise(mag_pub);
+  nh.advertise(sensor_data_pub);
 
   // Setting for Dynamixel motors
   motor_driver.init(NAME);
@@ -51,6 +49,7 @@ void setup()
 
   pinMode(LED_WORKING_CHECK, OUTPUT);
 
+  imu.begin();
   setup_end = true;
 }
 
@@ -75,29 +74,33 @@ void loop()
     tTime[0] = t;
   }
 
-
-  if ((t-tTime[2]) >= (1000 / DRIVE_INFORMATION_PUBLISH_FREQUENCY))
-  {
-    publishSensorStateMsg();
-    tTime[2] = t;
-  }
-
   if ((t-tTime[3]) >= (1000 / IMU_PUBLISH_FREQUENCY))
   {
-    publishImuMsg();
-    publishMagMsg();
+    sensor_data.battery_voltage = sensors.checkVoltage();
+    sensor_data.stamp = rosNow();
+    bool dxl_comm_result = motor_driver.readEncoder(left_enc, right_enc);
+    if(dxl_comm_result)
+    {
+        sensor_data.left_encoder = left_enc;
+        sensor_data.right_encoder = right_enc;
+    }
+
+    imu.gyro_get_adc();
+    imu.acc_get_adc();
+    imu.mag_get_adc();
+    sensor_data.gyroX= imu.gyroRAW[0];
+    sensor_data.gyroY= imu.gyroRAW[1];
+    sensor_data.gyroZ= imu.gyroRAW[2];
+    sensor_data.accelX= imu.accRAW[0];
+    sensor_data.accelY= imu.accRAW[1];
+    sensor_data.accelZ= imu.accRAW[2];
+    sensor_data.magX= imu.magRAW[0];
+    sensor_data.magY= imu.magRAW[1];
+    sensor_data.magZ= imu.magRAW[2];
+
+    sensor_data_pub.publish(&sensor_data);
     tTime[3] = t;
   }
-
-  // Send log message after ROS connection
-  sendLogMsg();
-
-
-  // Check push button pressed for simple test drive
-  driveTest(diagnosis.getButtonPress(3000));
-
-  // Update the IMU unit
-  sensors.updateIMU();
 
   // Call all the callbacks waiting to be called at that point in time
   nh.spinOnce();
@@ -109,7 +112,7 @@ void loop()
 /*******************************************************************************
 * Callback function for cmd_vel msg
 *******************************************************************************/
-void wheelCommandsCallback(const nurtle::WheelCommands & cmd_msg)
+void wheelCommandsCallback(const nuturtlebot::WheelCommands & cmd_msg)
 {
     left_velocity = cmd_msg.left_velocity;
     right_velocity = cmd_msg.right_velocity;
@@ -193,45 +196,6 @@ void publishSensorStateMsg(void)
   sensor_state_pub.publish(&sensor_state_msg);
 }
 
-
-/*******************************************************************************
-* Update motor information
-*******************************************************************************/
-void updateMotorInfo(int32_t left_tick, int32_t right_tick)
-{
-  int32_t current_tick = 0;
-  static int32_t last_tick[WHEEL_NUM] = {0, 0};
-  
-  if (init_encoder)
-  {
-    for (int index = 0; index < WHEEL_NUM; index++)
-    {
-      last_diff_tick[index] = 0;
-      last_tick[index]      = 0;
-      last_rad[index]       = 0.0;
-
-      last_velocity[index]  = 0.0;
-    }  
-
-    last_tick[LEFT] = left_tick;
-    last_tick[RIGHT] = right_tick;
-
-    init_encoder = false;
-    return;
-  }
-
-  current_tick = left_tick;
-
-  last_diff_tick[LEFT] = current_tick - last_tick[LEFT];
-  last_tick[LEFT]      = current_tick;
-  last_rad[LEFT]       += TICK2RAD * (double)last_diff_tick[LEFT];
-
-  current_tick = right_tick;
-
-  last_diff_tick[RIGHT] = current_tick - last_tick[RIGHT];
-  last_tick[RIGHT]      = current_tick;
-  last_rad[RIGHT]       += TICK2RAD * (double)last_diff_tick[RIGHT];
-}
 
 
 /*******************************************************************************

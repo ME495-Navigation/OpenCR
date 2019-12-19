@@ -1,12 +1,12 @@
-#ifndef _ROS_nurtle_WheelCommands_h
-#define _ROS_nurtle_WheelCommands_h
+#ifndef _ROS_nuturtlebot_WheelCommands_h
+#define _ROS_nuturtlebot_WheelCommands_h
 
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 #include "ros/msg.h"
 
-namespace nurtle
+namespace nuturtlebot
 {
 
   class WheelCommands : public ros::Msg
@@ -77,7 +77,7 @@ namespace nurtle
      return offset;
     }
 
-    const char * getType(){ return "nurtle/WheelCommands"; };
+    const char * getType(){ return "nuturtlebot/WheelCommands"; };
     const char * getMD5(){ return "55f26e03298a44797b568254274af487"; };
 
   };
