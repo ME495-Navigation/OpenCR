@@ -47,7 +47,7 @@
 
 #define FIRMWARE_VER "1.2.3"
 
-#define CONTROL_MOTOR_SPEED_FREQUENCY          30   //hz
+#define CONTROL_MOTOR_SPEED_FREQUENCY          200   //hz
 #define CONTROL_MOTOR_TIMEOUT                  500  //ms
 #define IMU_PUBLISH_FREQUENCY                  200  //hz
 #define DRIVE_INFORMATION_PUBLISH_FREQUENCY    30   //hz

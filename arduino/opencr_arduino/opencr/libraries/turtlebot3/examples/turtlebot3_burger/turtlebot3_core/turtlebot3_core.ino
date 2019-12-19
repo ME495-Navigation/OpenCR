@@ -27,7 +27,7 @@ void setup()
 
   // Initialize ROS node handle, advertise and subscribe the topics
   nh.initNode();
-  nh.getHardware()->setBaud(115200);
+  nh.getHardware()->setBaud(1000000);
 
   nh.subscribe(sound_sub);
   nh.subscribe(wheel_cmd_sub);
